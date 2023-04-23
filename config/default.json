@@ -1,5 +1,12 @@
 {
   "server": {
     "port": 8080
+  },
+  "database": {
+    "user": "me",
+    "host": "localhost",
+    "database": "api",
+    "password": "1234",
+    "port": 5432
   }
 }

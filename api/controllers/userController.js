@@ -1,72 +1,51 @@
-// const pool = require('../../config/pg');
+const User = require('../models/User');
 
-const { Pool } = require('pg');
+const getUsers = async (req, res) => {
+  const users = await User.findAll();
 
-const pool = new Pool({
-  user: 'me',
-  host: 'localhost',
-  database: 'api',
-  password: '1234',
-  port: 5432
-});
+  res.status(200).json(users);
+}
 
-const getUsers = (request, response) => {
-  pool.query('SELECT * FROM users ORDER BY id ASC', (error, results) => {
-    if (error) {
-      throw error
-    }
+const getUserById = async (req, res) => {
+  const id = parseInt(req.params.id);
 
-    response.status(200).json(results.rows)
+  const user = await User.findByPk(id);
+
+  res.status(200).json(user);
+}
+
+const createUser = async (req, res) => {
+  const { name, email } = req.body;
+
+  const results = await User.create({
+    name: name,
+    email: email
   })
+
+  res.status(201).send(`User added with ID: ${results}`)
 }
 
-const getUserById = (request, response) => {
-  const id = parseInt(request.params.id);
+const updateUser = async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name, email } = req.body;
 
-  pool.query('SELECT * FROM users WHERE id = $1', [id], (error, results) => {
-    if (error) {
-      throw error
+  await User.update({
+    name,
+    email
+  }, {
+    where: {
+      id: id
     }
-
-    response.status(200).json(results.rows)
   })
+  res.status(200).send(`User modified with ID: ${id}`)
 }
 
-const createUser = (request, response) => {
-  const { name, email } = request.body;
+const deleteUser = (req, res) => {
+  const id = parseInt(req.params.id);
 
-  pool.query('INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *', [name, email],
-    (error, results) => {
-      if (error) { throw error }
+  User.destroy({ where: { id } });
 
-      response.status(201).send(`User added with ID: ${results.rows[0].id}`)
-    }
-  )
-}
-
-const updateUser = (request, response) => {
-  const id = parseInt(request.params.id);
-  const { name, email } = request.body;
-
-  pool.query('UPDATE users SET name = $1, email = $2 WHERE id = $3', [name, email, id],
-    (error, results) => {
-      if (error) { throw error }
-
-      response.status(200).send(`User modified with ID: ${id}`)
-    }
-  );
-}
-
-const deleteUser = (request, response) => {
-  const id = parseInt(request.params.id);
-
-  pool.query('DELETE FROM users WHERE id = $1', [id],
-    (error, results) => {
-      if (error) { throw error }
-
-      response.status(200).send(`User deleted with ID: ${id}`)
-    }
-  )
+  res.status(200).send(`User deleted with ID: ${id}`);
 }
 
 module.exports = {

@@ -15,7 +15,6 @@ module.exports = () => {
   // require('../api/routes/customerWallets')(app);
 
   consign({cwd: 'api'})
-    .then('data')
     .then('controllers')
     .then('routes')
     .into(app);
